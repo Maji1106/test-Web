@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tinder-like Matching</title>
+<link rel="stylesheet" href="styles.css"> <!-- Link เข้าไปที่ไฟล์ CSS -->
+</head>
+<body>
+<div id="profile">
+    <img id="image" src="" alt="Profile Image">
+    <h2 id="name">John Doe</h2>
+    <p id="description">Description of the person...</p>
+    <div id="buttons">
+        <button onclick="moveToInternship1()">ย้ายไปฝึกงานที่ช่างไฟ</button>
+        <button onclick="moveToInternship2()">ย้ายไปฝึกงานที่ช่างคอม</button>
+        <button onclick="addNewProfile()">เพิ่มโปรไฟล์ใหม่</button>
+    </div>
+</div>
+
+<div id="search">
+    <input type="text" id="searchInput" placeholder="ค้นหาโปรไฟล์ด้วยคำอธิบาย">
+    <button onclick="searchProfile()">ค้นหา</button>
+</div>
+
+<div id="content">
+    <div id="sidebar" style="float: right;">
+        <h3>ข้อมูลบริษัท</h3>
+        <p id="companyInfo"></p>
+        <h3>ข้อมูลเด็กฝึกงาน</h3>
+        <p id="internInfo"></p>
+    </div>
+</div>
+
+<script>
+let profiles = [];
+let currentFilteredProfiles = [];
+
+fetch('profiles.json')
+    .then(response => response.json())
+    .then(data => {
+        profiles = data;
+        currentFilteredProfiles = profiles;
+        showProfile();
+    });
+
+let currentIndex = 0;
+const profile = document.getElementById('profile');
+const nameElement = document.getElementById('name');
+const descriptionElement = document.getElementById('description');
+const imageElement = document.getElementById('image');
+const sidebar = document.getElementById('sidebar');
+
+function showProfile() {
+    const currentProfile = currentFilteredProfiles[currentIndex];
+    nameElement.textContent = currentProfile.name;
+    descriptionElement.textContent = currentProfile.description;
+    imageElement.src = currentProfile.image;
+}
+
+function moveToInternship1() {
+    currentIndex++;
+    if (currentIndex >= currentFilteredProfiles.length) {
+        currentIndex = 0;
+    }
+    showProfile();
+    showSidebar();
+}
+
+function moveToInternship2() {
+    if (currentFilteredProfiles.length === 0) {
+        alert('หมดแล้ว');
+        return;
+    }
+    currentIndex++;
+    if (currentIndex >= currentFilteredProfiles.length) {
+        currentIndex = 0;
+    }
+    currentFilteredProfiles.splice(currentIndex - 1, 1);
+    if (currentFilteredProfiles.length === 0) {
+        alert('หมดแล้ว');
+        return;
+    }
+    showProfile();
+    showSidebar();
+}
+
+function addNewProfile() {
+    const newProfileName = prompt("Enter profile name:");
+    const newProfileDescription = prompt("Enter profile description:");
+    const newProfileImage = prompt("Enter profile image URL:");
+    const newProfileCompany = prompt("Enter company:");
+    if (newProfileName && newProfileDescription && newProfileImage && newProfileCompany) {
+        profiles.push({ name: newProfileName, description: newProfileDescription, image: newProfileImage, company: newProfileCompany });
+        currentFilteredProfiles = profiles;
+        showProfile();
+    }
+}
+
+function searchProfile() {
+    const searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+    if (searchInput === '') {
+        return; // ไม่ทำอะไรถ้าไม่ได้กรอกคำค้นหา
+    }
+    currentFilteredProfiles = profiles.filter(profile => profile.description.toLowerCase().includes(searchInput));
+    currentIndex = 0;
+    if (currentFilteredProfiles.length === 0) {
+        alert('ไม่พบโปรไฟล์ที่ตรงกับคำค้นหา');
+        return;
+    }
+    showProfile();
+}
+
+function showSidebar() {
+    const currentProfile = currentFilteredProfiles[currentIndex];
+    const companyInfoElement = document.getElementById('companyInfo');
+    const internInfoElement = document.getElementById('internInfo');
+    if (currentProfile) {
+        companyInfoElement.innerHTML = "<b>บริษัท:</b> " + currentProfile.company;
+        internInfoElement.innerHTML = "<b>ชื่อเด็กฝึกงาน:</b> " + currentProfile.name;
+        sidebar.style.display = 'block';
+    } else {
+        sidebar.style.display = 'none';
+    }
+}
+src="jo.js"
+</script>
+</body>
+</html>
